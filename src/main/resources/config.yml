@@ -1,0 +1,59 @@
+#############################################################################
+#                                                                           #
+#                        DynamicChestShop config.yml                        #
+#                        Generated for version @version@                        #
+#                                                                           #
+#############################################################################
+
+#########################################
+#                Storage                #
+#########################################
+
+Storage:
+  # Possible options:
+  #
+  #   Remote databases - require connection information to be configured below
+  #   -> MySQL
+  #   -> MariaDB (preferred over MySQL)
+  #   -> PostgreSQL
+  #
+  #   Flatfile/local database - don't require any extra configuration
+  #   -> SQLite
+  StorageMethod: PostgreSQL
+
+  DatabaseSettings:
+    # Define the address and port for the database.
+    # - The standard DB engine port is used by default
+    #   (MySQL: 3306, PostgreSQL: 5432, MongoDB: 27017)
+    # - Specify as "host:port" if differs
+    Address: "localhost:5432"
+    Database: dynamicchestshop
+
+    # Credentials for the database.
+    Username: dynamicchestshop
+    Password: 'dynamicchestshop'
+
+#########################################
+#                General                #
+#########################################
+
+General:
+  # The plugin language
+  Language: en
+  # Tax percentage that goes to the server account (0-100)
+  Taxes: 25
+  # How many most used shops should be cached internally
+  CachedShops: 100
+  # Whether holding SHIFT while interacting works in stacks
+  ShiftStacks: false
+  # Newbie helper: Blocks creation of chest shops that people can sell to for lower price then buy from
+  BlockHigherSellThanBuy: true
+  # Will allow transaction of lower amount if:
+  # - chestshop gets full
+  # - buyer doesn't have enough money
+  # - seller doesn't have enough items
+  # Price would be adequately scaled
+  AllowPartialTransactions: true
+
+
+

@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'czechbol'
-version = '1.0-SNAPSHOT'
+version = '0.0.1'
 
 sourceCompatibility = '1.16'
 targetCompatibility = '1.16'
@@ -43,8 +43,7 @@ test {
 }
 
 processResources {
-    from(sourceSets.main.resources.srcDirs) {
-        include 'src/main/resources/plugin.yml'
+    file("$rootDir/src/main/resources").listFiles().each {
         filter ReplaceTokens, tokens: [version: version]
     }
 }
