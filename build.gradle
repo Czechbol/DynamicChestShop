@@ -8,8 +8,8 @@ plugins {
 group = 'czechbol.dynamicshop'
 version = '1.0-SNAPSHOT'
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '1.16'
+targetCompatibility = '1.16'
 
 repositories {
     mavenCentral()
