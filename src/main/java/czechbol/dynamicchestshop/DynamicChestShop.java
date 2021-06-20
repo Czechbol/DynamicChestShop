@@ -1,6 +1,6 @@
 package czechbol.dynamicchestshop;
 
-import czechbol.dynamicchestshop.staticshop.Handler;
+import czechbol.dynamicchestshop.staticshop.ChestShopHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import czechbol.dynamicchestshop.staticshop.ChestShop;
@@ -18,7 +18,7 @@ public final class DynamicChestShop extends JavaPlugin {
     public void onEnable() {
         // Plugin startup logic
         System.out.println("DynamicChestShop has started UP.");
-        Bukkit.getServer().getPluginManager().registerEvents(new Handler(), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new ChestShopHandler(), this);
 
         //Setup Config
         getConfig().options().copyDefaults();

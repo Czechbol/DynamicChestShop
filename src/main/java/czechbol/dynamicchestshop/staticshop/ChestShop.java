@@ -1,64 +1,81 @@
 package czechbol.dynamicchestshop.staticshop;
 
-import czechbol.dynamicchestshop.DynamicChestShop;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.block.Sign;
-
-import java.sql.SQLException;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 
 public class ChestShop {
-    public static Pattern price_pattern = Pattern.compile("\\s*[BS]\\s*(\\d+)\\s*");
-    int id;
-    OfflinePlayer owner;
-    Location location;
-    int quantity;
-    float sell_price; //fixme: only buy shop?
-    float buy_price; //fixme: only sell shop?
-    Material material;
+    static final int NAME_LINE = 0;
+    static final int QUANTITY_LINE = 1;
+    static final int PRICES_LINE = 2;
+    static final int MATERIAL_LINE = 3;
 
-    public ChestShop(Location loc) {
+    private static final Pattern price_pattern = Pattern.compile("([BS]\\d+)(:(\\d+[BS]))?");
+    private static final Pattern buy_price_pattern = Pattern.compile("B (\\d+)");
+    private static final Pattern sell_price_pattern = Pattern.compile("(S (\\d+))|((\\d+) S)");
 
+    public static String formatPrices(String raw) throws Exception {
+        var prices = raw.replaceAll("\\s+", "");
+
+        String buy_price = null, sell_price = null;
+
+        var m = price_pattern.matcher(prices);
+        if (m.find()) {
+            var price = m.group(1);
+            if (price.contains("B")) {
+                buy_price = price.replace("B", "");
+            } else if (price.contains("S")) {
+                sell_price = price.replace("S", "");
+            }
+
+            price = m.group(3);
+
+            if (price.contains("B")) {
+                buy_price = price.replace("B", "");
+            } else if (price.contains("S")) {
+                sell_price = price.replace("S", "");
+            }
+        } else {
+            throw new Exception("Bad format");
+        }
+
+        StringBuilder prices_line = new StringBuilder();
+
+        if (buy_price != null) {
+            prices_line.append("B ");
+            prices_line.append(buy_price);
+
+            if (sell_price != null) {
+                prices_line.append(":");
+                prices_line.append(sell_price);
+                prices_line.append("S");
+            }
+        } else if (sell_price != null) {
+            prices_line.append("S ");
+            prices_line.append(sell_price);
+        } else {
+            throw new Exception("Bad format");
+        }
+
+        return prices_line.toString();
     }
 
-    public ChestShop(Sign sign) {
+    public static float getBuyPrice(String in) {
+        var m = buy_price_pattern.matcher(in);
 
+        if (m.find()) {
+            return Float.parseFloat(m.group(1));
+        }
+
+        return -1;
     }
 
-    public ChestShop(OfflinePlayer owner, Location location, float sell_price, float buy_price, Material material, int quantity) {
-        this.owner = owner;
-        this.location = location;
-        this.sell_price = sell_price;
-        this.buy_price = buy_price;
-        this.material = material;
-        this.quantity = quantity;
+    public static float getSellPrice(String in) {
+        var m = sell_price_pattern.matcher(in);
+
+        if (m.find()) {
+            return Float.parseFloat(m.group(1));
+        }
+
+        return -1;
     }
-
-    /**
-     * Adds chestshop entry to database
-     * */
-//    public void create() throws SQLException {
-//        var stmt = DynamicChestShop.conn.createStatement();
-//        stmt.executeQuery("INSERT INTO ")
-//    }
-
-    public void remove() {
-
-    }
-
-//    public static void create_table() throws SQLException {
-//        var stmt = DynamicChestShop.conn.createStatement();
-//        var sql = "CREATE TABLE staticshop" +
-//                "(id INTEGER NOT NULL," +
-//                "owner VARCHAR(16)," +
-//                "location "
-//    }
-    /*
-    public static Set<ChestShop> getPlayersShops(OfflinePlayer) {
-
-    }*/
 }
