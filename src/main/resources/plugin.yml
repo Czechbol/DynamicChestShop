@@ -1,6 +1,6 @@
 name: DynamicChestShop
 version: @version@
-main: czechbol.dynamicshop.dynamicchestshop.DynamicChestShop
+main: czechbol.dynamicchestshop.DynamicChestShop
 api-version: 1.17
 depend: [ Vault ]
 authors: [ Czechbol, CrafterSvK ]

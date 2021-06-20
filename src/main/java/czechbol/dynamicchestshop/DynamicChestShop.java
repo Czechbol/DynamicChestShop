@@ -1,4 +1,4 @@
-package czechbol.dynamicshop.dynamicchestshop;
+package czechbol.dynamicchestshop;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
