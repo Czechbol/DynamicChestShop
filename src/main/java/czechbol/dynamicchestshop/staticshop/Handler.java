@@ -1,12 +1,15 @@
 package czechbol.dynamicchestshop.staticshop;
 
 import czechbol.dynamicchestshop.DynamicChestShop;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 
 public class Handler implements Listener {
     static final int NAME_LINE = 0;
@@ -22,8 +25,6 @@ public class Handler implements Listener {
 
         var owner = e.getPlayer();
 
-        owner.sendMessage(e.getLines());
-
         e.setLine(NAME_LINE, owner.getName());
 
         var quantity = Integer.parseInt(e.getLine(QUANTITY_LINE).strip());
@@ -36,7 +37,6 @@ public class Handler implements Listener {
             var m = ChestShop.price_pattern.matcher(price);
             if (m.find()) {
                 var price_str = m.group(1);
-                owner.sendMessage(price_str);
 
                 if (price.contains("S")) {
                     sell_price = Float.parseFloat(price_str);
@@ -46,7 +46,7 @@ public class Handler implements Listener {
             }
         }
 
-        var material = Material.getMaterial(e.getLine(MATERIAL_LINE));
+        var material = Material.matchMaterial(e.getLine(MATERIAL_LINE));
 
         var sign_location = block.getLocation();
 
@@ -66,6 +66,29 @@ public class Handler implements Listener {
         if (shop != null) {
             if (shop.owner.getPlayer() != e.getPlayer()) {
                 e.setCancelled(true);
+            }
+        }
+    }
+
+    /**
+     * todo Economy
+     * */
+    @EventHandler
+    public void OnBuy(PlayerInteractEvent e) {
+        var block = e.getClickedBlock();
+        var player = e.getPlayer();
+
+        if (block.getState() instanceof Sign) {
+            ChestShop shop = DynamicChestShop.shops.get(block.getLocation());
+
+            if (shop != null) {
+                var final_price = shop.buy_price * shop.quantity;
+
+                player.sendMessage(String.format("You bought %s for %.2f", shop.material.toString(), final_price));
+
+                var stack = new ItemStack(shop.material, shop.quantity);
+
+                e.getPlayer().getInventory().addItem(stack);
             }
         }
     }
