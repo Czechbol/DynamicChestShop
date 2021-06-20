@@ -44,6 +44,7 @@ test {
 
 processResources {
     from(sourceSets.main.resources.srcDirs) {
+        include 'src/main/resources/plugin.yml'
         filter ReplaceTokens, tokens: [version: version]
     }
 }
