@@ -2,7 +2,6 @@ package czechbol.dynamicchestshop.staticshop;
 
 import czechbol.dynamicchestshop.DynamicChestShop;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -28,9 +27,25 @@ public class Handler implements Listener {
         e.setLine(NAME_LINE, owner.getName());
 
         var quantity = Integer.parseInt(e.getLine(QUANTITY_LINE).strip());
-        var result = ChestShop.price_pattern.matcher(e.getLine(PRICES_LINE));
-        var buy_price = Float.parseFloat(result.group("buy"));
-        var sell_price = Float.parseFloat(result.group("sell"));
+        var prices = e.getLine(PRICES_LINE).split(":", 2);
+
+        float buy_price = 0;
+        float sell_price = 0;
+
+        for (String price : prices) {
+            var m = ChestShop.price_pattern.matcher(price);
+            if (m.find()) {
+                var price_str = m.group(1);
+                owner.sendMessage(price_str);
+
+                if (price.contains("S")) {
+                    sell_price = Float.parseFloat(price_str);
+                } else if (price.contains("B")) {
+                    buy_price = Float.parseFloat(price_str);
+                }
+            }
+        }
+
         var material = Material.getMaterial(e.getLine(MATERIAL_LINE));
 
         var sign_location = block.getLocation();

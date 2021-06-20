@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 
 public class ChestShop {
-    public static Pattern price_pattern = Pattern.compile("B\\s*(?<buy>\\d+)\\s*:?\\s*S\\s*(?<sell>\\d+)");
+    public static Pattern price_pattern = Pattern.compile("\\s*[BS]\\s*(\\d+)\\s*");
     int id;
     OfflinePlayer owner;
     Location location;
