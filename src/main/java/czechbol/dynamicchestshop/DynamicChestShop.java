@@ -13,6 +13,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
+import java.util.logging.Level;
 
 public final class DynamicChestShop extends JavaPlugin {
     FileConfiguration config = getConfig();
@@ -42,22 +43,22 @@ public final class DynamicChestShop extends JavaPlugin {
         // Plugin shutdown logic
     }
 
-    private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            return false;
+    private void setupEconomy() {
+        try {
+            RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+            econ = rsp.getProvider();
+        } catch (NullPointerException e) {
+            getLogger().log(Level.SEVERE, "[DynamicChestShop] Could not load Vault economy");
         }
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) {
-            return false;
-        }
-        econ = rsp.getProvider();
-        return econ != null;
     }
 
-    private boolean setupPermissions() {
-        RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-        perms = rsp.getProvider();
-        return perms != null;
+    private void setupPermissions() {
+        try {
+            RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
+            perms = rsp.getProvider();
+        } catch (NullPointerException e) {
+            getLogger().log(Level.SEVERE, "[DynamicChestShop] Could not load Vault permissions");
+        }
     }
 
     public static Economy getEcon() {
