@@ -1,7 +1,6 @@
 package czechbol.dynamicchestshop.staticshop;
 
 import czechbol.dynamicchestshop.DynamicChestShop;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
@@ -11,7 +10,6 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.material.Chest;
 
 import static czechbol.dynamicchestshop.staticshop.ChestShop.*;
 
@@ -20,19 +18,19 @@ public class ChestShopHandler implements Listener {
     /**
      * todo: Locale
      * todo: check if chest is there and invulnerable it
-     * */
+     */
     @EventHandler
     public void OnSignPlace(SignChangeEvent e) {
         var block = e.getBlock();
         var player = e.getPlayer();
 
         if (!e.getLine(NAME_LINE).equalsIgnoreCase("[ChestShop]")) return;
-        if(!block.getWorld().getBlockAt(block.getLocation()
-                .subtract(0,1,0)).getType().equals(Material.CHEST)) {
+        if (!block.getWorld().getBlockAt(block.getLocation()
+                .subtract(0, 1, 0)).getType().equals(Material.CHEST)) {
             player.sendMessage("ChestShop: In order to create chestshop, you have to place chest first");
             return;
         }
-        if(block.getType() == Material.CHEST){
+        if (block.getType() == Material.CHEST) {
 
         }
 
@@ -70,12 +68,12 @@ public class ChestShopHandler implements Listener {
 
     /**
      * todo: No buy price osetrenie
-     * */
+     */
     @EventHandler
     public void OnSignInteract(PlayerInteractEvent e) {
         var action = e.getAction();
 
-        if(!action.equals(Action.LEFT_CLICK_BLOCK)
+        if (!action.equals(Action.LEFT_CLICK_BLOCK)
                 && !action.equals(Action.RIGHT_CLICK_BLOCK)) return;
 
         var block = e.getClickedBlock();
@@ -84,7 +82,7 @@ public class ChestShopHandler implements Listener {
             Sign sign = (Sign) block.getState();
             //todo: check if chestshop
 
-            if(!sign.getLine(NAME_LINE).equals("[ChestShop]")) return;
+            if (!sign.getLine(NAME_LINE).equals("[ChestShop]")) return;
 
             var quantity = Integer.parseInt(sign.getLine(QUANTITY_LINE));
             var material = Material.getMaterial(sign.getLine(MATERIAL_LINE));
@@ -93,19 +91,21 @@ public class ChestShopHandler implements Listener {
             switch (action) {
                 case LEFT_CLICK_BLOCK -> {
                     var price = ChestShop.getBuyPrice(sign.getLine(PRICES_LINE));
-                    if(price == -1) return;
+                    if (price == -1) return;
 
-                    if(DynamicChestShop.getEcon().getBalance(player) >= price) {
-                        if(player.getInventory().firstEmpty() == -1) {
+                    if (DynamicChestShop.getEcon().getBalance(player) >= price) {
+                        if (player.getInventory().firstEmpty() == -1) {
                             ItemStack[] content = player.getInventory().getContents();
                             var freeSpace = 0;
+
                             for (ItemStack is : content) {
-                                if(is == null) continue;
+                                if (is == null) continue;
                                 if (is.getType().equals(material)
                                         && is.getMaxStackSize() - is.getAmount() >= 0) {
                                     freeSpace += is.getMaxStackSize() - is.getAmount();
                                 }
                             }
+
                             if (freeSpace < quantity) {
                                 player.sendMessage("AdminShop: Your inventory is full");
                                 return;
@@ -121,22 +121,24 @@ public class ChestShopHandler implements Listener {
 
                 case RIGHT_CLICK_BLOCK -> {
                     var price = ChestShop.getSellPrice(sign.getLine(PRICES_LINE));
-                    if(price == -1) return;
+                    if (price == -1) return;
 
                     PlayerInventory playerInventory = player.getInventory();
                     ItemStack itemStack = new ItemStack(material, quantity);
-                    if(playerInventory.containsAtLeast(itemStack, quantity)){
+                    if (playerInventory.containsAtLeast(itemStack, quantity)) {
                         DynamicChestShop.getEcon().depositPlayer(player, price);
                         ItemStack[] content = playerInventory.getContents();
-                        for(ItemStack is : content){
-                            if(is != null && is.getType().equals(material)) {
+
+                        for (ItemStack is : content) {
+                            if (is != null && is.getType().equals(material)) {
                                 var amountOfItems = is.getAmount();
-                                if(amountOfItems >= quantity){
-                                    is.setAmount(amountOfItems-quantity);
+
+                                if (amountOfItems >= quantity) {
+                                    is.setAmount(amountOfItems - quantity);
                                     break;
                                 } else {
                                     is.setAmount(0);
-                                    quantity = quantity-amountOfItems;
+                                    quantity = quantity - amountOfItems;
                                 }
                             }
                         }

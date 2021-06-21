@@ -62,7 +62,7 @@ public class AdminShopHandler implements Listener {
     public void OnSignInteract(PlayerInteractEvent e) {
         var action = e.getAction();
 
-        if(!action.equals(Action.LEFT_CLICK_BLOCK)
+        if (!action.equals(Action.LEFT_CLICK_BLOCK)
                 && !action.equals(Action.RIGHT_CLICK_BLOCK)) return;
 
         var block = e.getClickedBlock();
@@ -72,7 +72,7 @@ public class AdminShopHandler implements Listener {
 
             var quantity = Integer.parseInt(sign.getLine(QUANTITY_LINE));
             var material = Material.getMaterial(sign.getLine(MATERIAL_LINE));
-            if(material == null) {
+            if (material == null) {
                 e.getPlayer().sendMessage("AdminShop: Invalid item");
                 return;
             }
@@ -82,14 +82,14 @@ public class AdminShopHandler implements Listener {
                 case LEFT_CLICK_BLOCK -> {
                     var price = ChestShop.getBuyPrice(sign.getLine(PRICES_LINE));
                     System.out.println(price);
-                    if(price == -1) return;
+                    if (price == -1) return;
 
-                    if(DynamicChestShop.getEcon().getBalance(player) >= price) {
-                        if(player.getInventory().firstEmpty() == -1) {
+                    if (DynamicChestShop.getEcon().getBalance(player) >= price) {
+                        if (player.getInventory().firstEmpty() == -1) {
                             ItemStack[] content = player.getInventory().getContents();
                             var freeSpace = 0;
                             for (ItemStack is : content) {
-                                if(is == null) continue;
+                                if (is == null) continue;
                                 if (is.getType().equals(material)
                                         && is.getMaxStackSize() - is.getAmount() >= 0) {
                                     freeSpace += is.getMaxStackSize() - is.getAmount();
@@ -111,22 +111,22 @@ public class AdminShopHandler implements Listener {
                 case RIGHT_CLICK_BLOCK -> {
                     var price = ChestShop.getSellPrice(sign.getLine(PRICES_LINE));
                     System.out.println(price);
-                    if(price == -1) return;
+                    if (price == -1) return;
 
                     PlayerInventory playerInventory = player.getInventory();
                     ItemStack itemStack = new ItemStack(material, quantity);
-                    if(playerInventory.containsAtLeast(itemStack, quantity)){
+                    if (playerInventory.containsAtLeast(itemStack, quantity)) {
                         DynamicChestShop.getEcon().depositPlayer(player, price);
                         ItemStack[] content = playerInventory.getContents();
-                        for(ItemStack is : content){
-                            if(is != null && is.getType().equals(material)) {
+                        for (ItemStack is : content) {
+                            if (is != null && is.getType().equals(material)) {
                                 var amountOfItems = is.getAmount();
-                                if(amountOfItems >= quantity){
-                                    is.setAmount(amountOfItems-quantity);
+                                if (amountOfItems >= quantity) {
+                                    is.setAmount(amountOfItems - quantity);
                                     break;
                                 } else {
                                     is.setAmount(0);
-                                    quantity = quantity-amountOfItems;
+                                    quantity = quantity - amountOfItems;
                                 }
                             }
                         }
@@ -142,12 +142,12 @@ public class AdminShopHandler implements Listener {
     }
 
     @EventHandler
-    public void onSignBreak(BlockBreakEvent event){
-        if(event.getBlock().getState() instanceof Sign sign){
-            if(sign.getLine(0).equals("[AdminShop]")
-                    && !event.getPlayer().hasPermission("dynamicshop.adminshop.toggle")){
+    public void onSignBreak(BlockBreakEvent event) {
+        if (event.getBlock().getState() instanceof Sign sign) {
+            if (sign.getLine(0).equals("[AdminShop]")
+                    && !event.getPlayer().hasPermission("dynamicshop.adminshop.toggle")) {
                 event.setCancelled(true);
-                if(!event.getPlayer().hasPermission("dynamicshop.adminshop"))
+                if (!event.getPlayer().hasPermission("dynamicshop.adminshop"))
                     event.getPlayer().sendMessage("AdminShop: You can not destroy admin shops.");
                 else
                     event.getPlayer().sendMessage("AdminShop: Use /toggleadmindestroy or\n" +

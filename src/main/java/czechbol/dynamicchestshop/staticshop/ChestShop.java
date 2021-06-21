@@ -1,6 +1,5 @@
 package czechbol.dynamicchestshop.staticshop;
 
-import java.util.Arrays;
 import java.util.regex.Pattern;
 
 
@@ -25,10 +24,8 @@ public class ChestShop {
             if (price.contains("B")) {
                 buy_price = price.replace("B", "");
                 price = m.group(3);
-                if (price.contains("S")) {
-                    sell_price = price.replace("S", "");
-                }
-            } else if (price.contains("S")) {
+            }
+            if (price.contains("S")) {
                 sell_price = price.replace("S", "");
             }
         } else {
@@ -38,13 +35,13 @@ public class ChestShop {
         StringBuilder stringBuilder = new StringBuilder();
 
         if (buy_price != null) {
-            stringBuilder.append("B " + buy_price);
+            stringBuilder.append("B ").append(buy_price);
             if (sell_price != null) {
-                stringBuilder.append(":" + buy_price + " S");
+                stringBuilder.append(":").append(sell_price).append(" S");
                 return stringBuilder.toString();
             }
         } else if (sell_price != null) {
-            stringBuilder.append("S " + sell_price);
+            stringBuilder.append("S ").append(sell_price);
         }
         return stringBuilder.toString();
     }
@@ -60,9 +57,9 @@ public class ChestShop {
     public static float getSellPrice(String in) {
         var m = sell_price_pattern.matcher(in);
         if (m.find()) {
-            if(m.groupCount() == 2)
+            if (m.groupCount() == 2)
                 return Float.parseFloat(m.group(2));
-            else if(m.groupCount() == 4)
+            else if (m.groupCount() == 4)
                 return Float.parseFloat(m.group(4));
         }
         return -1;
