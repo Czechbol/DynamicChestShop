@@ -5,9 +5,11 @@ import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import static czechbol.dynamicchestshop.staticshop.ChestShop.*;
 
@@ -58,11 +60,14 @@ public class ChestShopHandler implements Listener {
 
     /**
      * todo: No buy price osetrenie
-     * todo: economy
-     * todo: handle events pls
      * */
     @EventHandler
     public void OnSignInteract(PlayerInteractEvent e) {
+        var action = e.getAction();
+
+        if(!action.equals(Action.LEFT_CLICK_BLOCK)
+                && !action.equals(Action.RIGHT_CLICK_BLOCK)) return;
+
         var block = e.getClickedBlock();
 
         if (block.getState() instanceof Sign) {
@@ -73,19 +78,42 @@ public class ChestShopHandler implements Listener {
             var material = Material.getMaterial(sign.getLine(MATERIAL_LINE));
             var player = e.getPlayer();
 
-            var action = e.getAction();
-
             switch (action) {
                 case LEFT_CLICK_BLOCK -> {
                     var price = ChestShop.getBuyPrice(sign.getLine(PRICES_LINE));
-                    DynamicChestShop.getEcon().withdrawPlayer(player, price);
-                    player.getInventory().addItem(new ItemStack(material, quantity));
+                    //TODO: Check if player has full inventory
+                    if(DynamicChestShop.getEcon().getBalance(player) >= price) {
+                        //TODO: Check presence of items and remove items from chest
+                        DynamicChestShop.getEcon().withdrawPlayer(player, price);
+                        player.getInventory().addItem(new ItemStack(material, quantity));
+                    } else {
+                        player.sendMessage("AdminShop: You do not have enough money");
+                    }
                 }
 
                 case RIGHT_CLICK_BLOCK -> {
                     var price = ChestShop.getSellPrice(sign.getLine(PRICES_LINE));
-                    DynamicChestShop.getEcon().depositPlayer(player, price);
-                    player.getInventory().remove(new ItemStack(material, quantity));
+                    PlayerInventory playerInventory = player.getInventory();
+                    ItemStack itemStack = new ItemStack(material, quantity);
+                    if(playerInventory.containsAtLeast(itemStack, quantity)){
+                        DynamicChestShop.getEcon().depositPlayer(player, price);
+                        ItemStack[] content = playerInventory.getContents();
+                        for(ItemStack is : content){
+                            if(is != null && is.getType().equals(material)) {
+                                var amountOfItems = is.getAmount();
+                                if(amountOfItems >= quantity){
+                                    is.setAmount(amountOfItems-quantity);
+                                    break;
+                                } else {
+                                    is.setAmount(0);
+                                    quantity = quantity-amountOfItems;
+                                }
+                            }
+                        }
+                        //TODO: Change global price on sell accordingly
+                    } else {
+                        player.sendMessage("AdminShop: You do not have enough items to sell");
+                    }
                 }
 
                 default -> throw new IllegalStateException("Unexpected value: " + action);

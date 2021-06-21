@@ -3,6 +3,12 @@ version: @version@
 main: czechbol.dynamicchestshop.DynamicChestShop
 api-version: 1.17
 depend: [ Vault ]
-authors: [ Czechbol, CrafterSvK ]
+authors: [ Czechbol, CrafterSvK, Charashenko ]
 description: Chest shop minecraft plugin with static and dynamic pricing
 website: https://github.com/Czechbol/DynamicChestShop
+commands:
+  toggleadmindestroy:
+    description: Toggles destroy of admin shops
+    permission: dynamicshop.admindestroy
+    aliases:
+      - tad
