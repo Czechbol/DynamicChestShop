@@ -21,7 +21,7 @@ public class AdminShopHandler implements Listener {
         var player = e.getPlayer();
 
         if (!e.getLine(NAME_LINE).equalsIgnoreCase("[AdminShop]")) return;
-        System.out.println(e.getLine(NAME_LINE));
+
         if (!player.hasPermission("dynamicshop.adminshop")) {
             e.getPlayer().sendMessage("You don't have permission to create AdminShop");
             e.setCancelled(true);
@@ -58,9 +58,6 @@ public class AdminShopHandler implements Listener {
         player.sendMessage("AdminShop: Shop was created");
     }
 
-    /**
-     * todo: No buy price osetrenie
-     * */
     @EventHandler
     public void OnSignInteract(PlayerInteractEvent e) {
         var action = e.getAction();
@@ -70,8 +67,7 @@ public class AdminShopHandler implements Listener {
 
         var block = e.getClickedBlock();
 
-        if (block.getState() instanceof Sign) {
-            Sign sign = (Sign) block.getState();
+        if (block.getState() instanceof Sign sign) {
             if (!sign.getLine(NAME_LINE).equals("[AdminShop]")) return;
 
             var quantity = Integer.parseInt(sign.getLine(QUANTITY_LINE));
@@ -85,8 +81,25 @@ public class AdminShopHandler implements Listener {
             switch (action) {
                 case LEFT_CLICK_BLOCK -> {
                     var price = ChestShop.getBuyPrice(sign.getLine(PRICES_LINE));
-                    //TODO: Check if player has full inventory
+                    System.out.println(price);
+                    if(price == -1) return;
+
                     if(DynamicChestShop.getEcon().getBalance(player) >= price) {
+                        if(player.getInventory().firstEmpty() == -1) {
+                            ItemStack[] content = player.getInventory().getContents();
+                            var freeSpace = 0;
+                            for (ItemStack is : content) {
+                                if(is == null) continue;
+                                if (is.getType().equals(material)
+                                        && is.getMaxStackSize() - is.getAmount() >= 0) {
+                                    freeSpace += is.getMaxStackSize() - is.getAmount();
+                                }
+                            }
+                            if (freeSpace < quantity) {
+                                player.sendMessage("AdminShop: Your inventory is full");
+                                return;
+                            }
+                        }
                         DynamicChestShop.getEcon().withdrawPlayer(player, price);
                         player.getInventory().addItem(new ItemStack(material, quantity));
                         //TODO: Change global price on buy accordingly
@@ -97,6 +110,8 @@ public class AdminShopHandler implements Listener {
 
                 case RIGHT_CLICK_BLOCK -> {
                     var price = ChestShop.getSellPrice(sign.getLine(PRICES_LINE));
+                    System.out.println(price);
+                    if(price == -1) return;
 
                     PlayerInventory playerInventory = player.getInventory();
                     ItemStack itemStack = new ItemStack(material, quantity);
@@ -128,12 +143,11 @@ public class AdminShopHandler implements Listener {
 
     @EventHandler
     public void onSignBreak(BlockBreakEvent event){
-        if(event.getBlock().getState() instanceof Sign){
-            Sign sign = (Sign) event.getBlock().getState();
+        if(event.getBlock().getState() instanceof Sign sign){
             if(sign.getLine(0).equals("[AdminShop]")
-                    && !event.getPlayer().hasPermission("dynamicshop.admindestroy.toggle")){
+                    && !event.getPlayer().hasPermission("dynamicshop.adminshop.toggle")){
                 event.setCancelled(true);
-                if(!event.getPlayer().hasPermission("dynamicshop.admindestroy"))
+                if(!event.getPlayer().hasPermission("dynamicshop.adminshop"))
                     event.getPlayer().sendMessage("AdminShop: You can not destroy admin shops.");
                 else
                     event.getPlayer().sendMessage("AdminShop: Use /toggleadmindestroy or\n" +

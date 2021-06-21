@@ -9,6 +9,6 @@ website: https://github.com/Czechbol/DynamicChestShop
 commands:
   toggleadmindestroy:
     description: Toggles destroy of admin shops
-    permission: dynamicshop.admindestroy
+    permission: dynamicshop.adminshop
     aliases:
       - tad

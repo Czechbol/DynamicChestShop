@@ -1,6 +1,7 @@
 package czechbol.dynamicchestshop.staticshop;
 
 import czechbol.dynamicchestshop.DynamicChestShop;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
@@ -10,6 +11,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.material.Chest;
 
 import static czechbol.dynamicchestshop.staticshop.ChestShop.*;
 
@@ -25,15 +27,23 @@ public class ChestShopHandler implements Listener {
         var player = e.getPlayer();
 
         if (!e.getLine(NAME_LINE).equalsIgnoreCase("[ChestShop]")) return;
+        if(!block.getWorld().getBlockAt(block.getLocation()
+                .subtract(0,1,0)).getType().equals(Material.CHEST)) {
+            player.sendMessage("ChestShop: In order to create chestshop, you have to place chest first");
+            return;
+        }
+        if(block.getType() == Material.CHEST){
 
-        e.setLine(NAME_LINE, player.getName());
+        }
+
+        e.setLine(NAME_LINE, String.format("[%s]", player.getName()));
 
         try {
             var quantity = Integer.parseInt(e.getLine(QUANTITY_LINE).strip());
             e.setLine(QUANTITY_LINE, String.format("%d", quantity));
         } catch (Exception exp) {
             player.sendMessage("ChestShop: Required quantity must be Integer");
-            block.setType(Material.AIR);
+            e.setCancelled(true);
             return;
         }
 
@@ -41,7 +51,7 @@ public class ChestShopHandler implements Listener {
             e.setLine(PRICES_LINE, ChestShop.formatPrices(e.getLine(PRICES_LINE)));
         } catch (Exception exp) {
             player.sendMessage("ChestShop: Could not be created");
-            block.setType(Material.AIR);
+            e.setCancelled(true);
             return;
         }
 
@@ -83,11 +93,27 @@ public class ChestShopHandler implements Listener {
             switch (action) {
                 case LEFT_CLICK_BLOCK -> {
                     var price = ChestShop.getBuyPrice(sign.getLine(PRICES_LINE));
-                    //TODO: Check if player has full inventory
+                    if(price == -1) return;
+
                     if(DynamicChestShop.getEcon().getBalance(player) >= price) {
-                        //TODO: Check presence of items and remove items from chest
+                        if(player.getInventory().firstEmpty() == -1) {
+                            ItemStack[] content = player.getInventory().getContents();
+                            var freeSpace = 0;
+                            for (ItemStack is : content) {
+                                if(is == null) continue;
+                                if (is.getType().equals(material)
+                                        && is.getMaxStackSize() - is.getAmount() >= 0) {
+                                    freeSpace += is.getMaxStackSize() - is.getAmount();
+                                }
+                            }
+                            if (freeSpace < quantity) {
+                                player.sendMessage("AdminShop: Your inventory is full");
+                                return;
+                            }
+                        }
                         DynamicChestShop.getEcon().withdrawPlayer(player, price);
                         player.getInventory().addItem(new ItemStack(material, quantity));
+                        //TODO: Change global price on buy accordingly
                     } else {
                         player.sendMessage("ChestShop: You do not have enough money");
                     }
@@ -95,6 +121,8 @@ public class ChestShopHandler implements Listener {
 
                 case RIGHT_CLICK_BLOCK -> {
                     var price = ChestShop.getSellPrice(sign.getLine(PRICES_LINE));
+                    if(price == -1) return;
+
                     PlayerInventory playerInventory = player.getInventory();
                     ItemStack itemStack = new ItemStack(material, quantity);
                     if(playerInventory.containsAtLeast(itemStack, quantity)){

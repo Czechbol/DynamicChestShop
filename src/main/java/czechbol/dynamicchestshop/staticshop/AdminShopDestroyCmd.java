@@ -12,14 +12,14 @@ public class AdminShopDestroyCmd implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if(sender instanceof Player){
             Player player = (Player) sender; //TODO: This system doesn't work with /op-ed players
-            if(player.hasPermission("dynamicshop.admindestroy")){
-                if(player.hasPermission("dynamicshop.admindestroy.toggle")){
+            if(player.hasPermission("dynamicshop.adminshop")){
+                if(player.hasPermission("dynamicshop.adminshop.toggle")){
                     DynamicChestShop.getPerms().playerRemove(player,
-                            "dynamicshop.admindestroy.toggle");
+                            "dynamicshop.adminshop.toggle");
                     player.sendMessage("AdminShop: Admin destroy is toggled off");
                 } else {
                     DynamicChestShop.getPerms().playerAdd(player,
-                            "dynamicshop.admindestroy.toggle");
+                            "dynamicshop.adminshop.toggle");
                     player.sendMessage("AdminShop: Admin destroy is toggled on");
                 }
             } else {
