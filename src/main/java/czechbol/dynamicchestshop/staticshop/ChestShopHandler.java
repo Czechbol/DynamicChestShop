@@ -1,5 +1,6 @@
 package czechbol.dynamicchestshop.staticshop;
 
+import czechbol.dynamicchestshop.DynamicChestShop;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
@@ -56,7 +57,7 @@ public class ChestShopHandler implements Listener {
     }
 
     /**
-     * todo: No buy price ošetrenie
+     * todo: No buy price osetrenie
      * todo: economy
      * todo: handle events pls
      * */
@@ -64,7 +65,8 @@ public class ChestShopHandler implements Listener {
     public void OnSignInteract(PlayerInteractEvent e) {
         var block = e.getClickedBlock();
 
-        if (block.getState() instanceof Sign sign) {
+        if (block.getState() instanceof Sign) {
+            Sign sign = (Sign) block.getState();
             //todo: check if chestshop
 
             var quantity = Integer.parseInt(sign.getLine(QUANTITY_LINE));
@@ -76,14 +78,16 @@ public class ChestShopHandler implements Listener {
             switch (action) {
                 case LEFT_CLICK_BLOCK -> {
                     var price = ChestShop.getBuyPrice(sign.getLine(PRICES_LINE));
-
+                    DynamicChestShop.getEcon().withdrawPlayer(player, price);
                     player.getInventory().addItem(new ItemStack(material, quantity));
                 }
+
                 case RIGHT_CLICK_BLOCK -> {
                     var price = ChestShop.getSellPrice(sign.getLine(PRICES_LINE));
-
+                    DynamicChestShop.getEcon().depositPlayer(player, price);
                     player.getInventory().remove(new ItemStack(material, quantity));
                 }
+
                 default -> throw new IllegalStateException("Unexpected value: " + action);
             }
         }
