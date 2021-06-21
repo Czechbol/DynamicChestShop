@@ -11,7 +11,7 @@ public class AdminShopDestroyCmd implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if(sender instanceof Player){
-            Player player = (Player) sender;
+            Player player = (Player) sender; //TODO: This system doesn't work with /op-ed players
             if(player.hasPermission("dynamicshop.admindestroy")){
                 if(player.hasPermission("dynamicshop.admindestroy.toggle")){
                     DynamicChestShop.getPerms().playerRemove(player,

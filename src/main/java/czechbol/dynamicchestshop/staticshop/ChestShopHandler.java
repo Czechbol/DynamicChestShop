@@ -32,7 +32,7 @@ public class ChestShopHandler implements Listener {
             var quantity = Integer.parseInt(e.getLine(QUANTITY_LINE).strip());
             e.setLine(QUANTITY_LINE, String.format("%d", quantity));
         } catch (Exception exp) {
-            player.sendMessage("ChestShop: required quantity must be Integer");
+            player.sendMessage("ChestShop: Required quantity must be Integer");
             block.setType(Material.AIR);
             return;
         }
@@ -40,7 +40,7 @@ public class ChestShopHandler implements Listener {
         try {
             e.setLine(PRICES_LINE, ChestShop.formatPrices(e.getLine(PRICES_LINE)));
         } catch (Exception exp) {
-            player.sendMessage("ChestShop: could not be created");
+            player.sendMessage("ChestShop: Could not be created");
             block.setType(Material.AIR);
             return;
         }
@@ -55,7 +55,7 @@ public class ChestShopHandler implements Listener {
 
         //todo: set invulnerability
 
-        player.sendMessage("Chestshop was created");
+        player.sendMessage("ChestShop: Shop was created");
     }
 
     /**
@@ -74,6 +74,8 @@ public class ChestShopHandler implements Listener {
             Sign sign = (Sign) block.getState();
             //todo: check if chestshop
 
+            if(!sign.getLine(NAME_LINE).equals("[ChestShop]")) return;
+
             var quantity = Integer.parseInt(sign.getLine(QUANTITY_LINE));
             var material = Material.getMaterial(sign.getLine(MATERIAL_LINE));
             var player = e.getPlayer();
@@ -87,7 +89,7 @@ public class ChestShopHandler implements Listener {
                         DynamicChestShop.getEcon().withdrawPlayer(player, price);
                         player.getInventory().addItem(new ItemStack(material, quantity));
                     } else {
-                        player.sendMessage("AdminShop: You do not have enough money");
+                        player.sendMessage("ChestShop: You do not have enough money");
                     }
                 }
 
@@ -112,7 +114,7 @@ public class ChestShopHandler implements Listener {
                         }
                         //TODO: Change global price on sell accordingly
                     } else {
-                        player.sendMessage("AdminShop: You do not have enough items to sell");
+                        player.sendMessage("ChestShop: You do not have enough items to sell");
                     }
                 }
 

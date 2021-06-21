@@ -133,6 +133,11 @@ public class AdminShopHandler implements Listener {
             if(sign.getLine(0).equals("[AdminShop]")
                     && !event.getPlayer().hasPermission("dynamicshop.admindestroy.toggle")){
                 event.setCancelled(true);
+                if(!event.getPlayer().hasPermission("dynamicshop.admindestroy"))
+                    event.getPlayer().sendMessage("AdminShop: You can not destroy admin shops.");
+                else
+                    event.getPlayer().sendMessage("AdminShop: Use /toggleadmindestroy or\n" +
+                            " /tad to toggle admin shop destroy mode.");
             }
         }
     }
