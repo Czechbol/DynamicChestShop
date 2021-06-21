@@ -1,5 +1,7 @@
 package czechbol.dynamicchestshop;
 
+import czechbol.dynamicchestshop.staticshop.AdminShopDestroyCmd;
+import czechbol.dynamicchestshop.staticshop.AdminShopHandler;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import czechbol.dynamicchestshop.staticshop.ChestShopHandler;
@@ -21,8 +23,10 @@ public final class DynamicChestShop extends JavaPlugin {
     @Override
     public void onEnable() {
         // Plugin startup logic
-        System.out.println("DynamicChestShop has started UP.");
+        System.out.println("[DynamicChestShop] Has started UP.");
         Bukkit.getServer().getPluginManager().registerEvents(new ChestShopHandler(), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new AdminShopHandler(), this);
+        Bukkit.getServer().getPluginCommand("toggleadmindestroy").setExecutor(new AdminShopDestroyCmd());
 
         //Vault hooks
         setupPermissions();
