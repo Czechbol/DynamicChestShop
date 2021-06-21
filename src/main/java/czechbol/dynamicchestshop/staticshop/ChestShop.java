@@ -1,5 +1,6 @@
 package czechbol.dynamicchestshop.staticshop;
 
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 
@@ -23,14 +24,10 @@ public class ChestShop {
             var price = m.group(1);
             if (price.contains("B")) {
                 buy_price = price.replace("B", "");
-            } else if (price.contains("S")) {
-                sell_price = price.replace("S", "");
-            }
-
-            price = m.group(3);
-
-            if (price.contains("B")) {
-                buy_price = price.replace("B", "");
+                price = m.group(3);
+                if (price.contains("S")) {
+                    sell_price = price.replace("S", "");
+                }
             } else if (price.contains("S")) {
                 sell_price = price.replace("S", "");
             }
@@ -38,44 +35,36 @@ public class ChestShop {
             throw new Exception("Bad format");
         }
 
-        StringBuilder prices_line = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
 
         if (buy_price != null) {
-            prices_line.append("B ");
-            prices_line.append(buy_price);
-
+            stringBuilder.append("B " + buy_price);
             if (sell_price != null) {
-                prices_line.append(":");
-                prices_line.append(sell_price);
-                prices_line.append("S");
+                stringBuilder.append(":" + buy_price + " S");
+                return stringBuilder.toString();
             }
         } else if (sell_price != null) {
-            prices_line.append("S ");
-            prices_line.append(sell_price);
-        } else {
-            throw new Exception("Bad format");
+            stringBuilder.append("S " + sell_price);
         }
-
-        return prices_line.toString();
+        return stringBuilder.toString();
     }
 
     public static float getBuyPrice(String in) {
         var m = buy_price_pattern.matcher(in);
-
         if (m.find()) {
             return Float.parseFloat(m.group(1));
         }
-
         return -1;
     }
 
     public static float getSellPrice(String in) {
         var m = sell_price_pattern.matcher(in);
-
         if (m.find()) {
-            return Float.parseFloat(m.group(1));
+            if(m.groupCount() == 2)
+                return Float.parseFloat(m.group(2));
+            else if(m.groupCount() == 4)
+                return Float.parseFloat(m.group(4));
         }
-
         return -1;
     }
 }
