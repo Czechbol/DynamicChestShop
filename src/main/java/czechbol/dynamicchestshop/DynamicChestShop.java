@@ -1,29 +1,22 @@
 package czechbol.dynamicchestshop;
 
-import czechbol.dynamicchestshop.staticshop.AdminShopDestroyCmd;
-import czechbol.dynamicchestshop.staticshop.AdminShopHandler;
+import czechbol.dynamicchestshop.dynamicshop.AdminShopDestroyCmd;
+import czechbol.dynamicchestshop.dynamicshop.AdminShopHandler;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
-import czechbol.dynamicchestshop.staticshop.ChestShopHandler;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
-import czechbol.dynamicchestshop.staticshop.ChestShop;
+import czechbol.dynamicchestshop.dynamicshop.AdminShop;
 import org.bukkit.Location;
-import org.bukkit.entity.EntityCategory;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.hibernate.bytecode.enhance.internal.javassist.FieldWriter;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Level;
 
 public final class DynamicChestShop extends JavaPlugin {
     private static FileConfiguration config;
-    public static HashMap<Location, ChestShop> shops = new HashMap<>();
+    public static HashMap<Location, AdminShop> shops = new HashMap<>();
     private static Economy econ = null;
     private static Permission perms = null;
 
@@ -31,7 +24,6 @@ public final class DynamicChestShop extends JavaPlugin {
     public void onEnable() {
         // Plugin startup logic
         System.out.println("[DynamicChestShop] Has started UP.");
-        Bukkit.getServer().getPluginManager().registerEvents(new ChestShopHandler(), this);
         Bukkit.getServer().getPluginManager().registerEvents(new AdminShopHandler(), this);
         Bukkit.getServer().getPluginCommand("toggleadmindestroy").setExecutor(new AdminShopDestroyCmd());
 

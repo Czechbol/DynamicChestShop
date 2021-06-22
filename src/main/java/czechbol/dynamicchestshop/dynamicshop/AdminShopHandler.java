@@ -1,4 +1,4 @@
-package czechbol.dynamicchestshop.staticshop;
+package czechbol.dynamicchestshop.dynamicshop;
 
 import czechbol.dynamicchestshop.DynamicChestShop;
 import org.bukkit.Material;
@@ -12,7 +12,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import static czechbol.dynamicchestshop.staticshop.ChestShop.*;
+import static czechbol.dynamicchestshop.dynamicshop.AdminShop.*;
 
 public class AdminShopHandler implements Listener {
     @EventHandler
@@ -40,7 +40,7 @@ public class AdminShopHandler implements Listener {
         }
 
         try {
-            e.setLine(PRICES_LINE, ChestShop.formatPrices(e.getLine(PRICES_LINE)));
+            e.setLine(PRICES_LINE, AdminShop.formatPrices(e.getLine(PRICES_LINE)));
         } catch (Exception exp) {
             player.sendMessage("AdminShop: " + exp.getMessage());
             block.setType(Material.AIR);
@@ -61,6 +61,7 @@ public class AdminShopHandler implements Listener {
     @EventHandler
     public void OnSignInteract(PlayerInteractEvent e) {
         var action = e.getAction();
+        var player = e.getPlayer();
 
         if (!action.equals(Action.LEFT_CLICK_BLOCK)
                 && !action.equals(Action.RIGHT_CLICK_BLOCK)) return;
@@ -72,16 +73,16 @@ public class AdminShopHandler implements Listener {
 
             var quantity = Integer.parseInt(sign.getLine(QUANTITY_LINE));
             var material = Material.getMaterial(sign.getLine(MATERIAL_LINE));
+
             if (material == null) {
-                e.getPlayer().sendMessage("AdminShop: Invalid item");
+                player.sendMessage("AdminShop: Invalid item");
                 return;
             }
-            var player = e.getPlayer();
 
             switch (action) {
                 case LEFT_CLICK_BLOCK -> {
-                    var price = ChestShop.getBuyPrice(sign.getLine(PRICES_LINE));
-                    if (price == -1) {
+                    var price = AdminShop.getBuyPrice(sign.getLine(PRICES_LINE));
+                    if (price == NOT_FOR_BUY) {
                         player.sendMessage("AdminShop: You can not buy in this shop.");
                         return;
                     }
@@ -89,6 +90,7 @@ public class AdminShopHandler implements Listener {
                     if (DynamicChestShop.getEcon().getBalance(player) >= price) {
                         if (player.getInventory().firstEmpty() == -1) {
                             ItemStack[] content = player.getInventory().getContents();
+
                             var freeSpace = 0;
                             for (ItemStack is : content) {
                                 if (is == null) continue;
@@ -97,11 +99,13 @@ public class AdminShopHandler implements Listener {
                                     freeSpace += is.getMaxStackSize() - is.getAmount();
                                 }
                             }
+
                             if (freeSpace < quantity) {
                                 player.sendMessage("AdminShop: Your inventory is full");
                                 return;
                             }
                         }
+
                         DynamicChestShop.getEcon().withdrawPlayer(player, price);
                         player.getInventory().addItem(new ItemStack(material, quantity));
                         //TODO: Change global price on buy accordingly
@@ -111,20 +115,23 @@ public class AdminShopHandler implements Listener {
                 }
 
                 case RIGHT_CLICK_BLOCK -> {
-                    var price = ChestShop.getSellPrice(sign.getLine(PRICES_LINE));
-                    if (price == -1) {
+                    var price = AdminShop.getSellPrice(sign.getLine(PRICES_LINE));
+                    if (price == NOT_FOR_SALE) {
                         player.sendMessage("AdminShop: You can not sell in this shop.");
                         return;
                     }
 
                     PlayerInventory playerInventory = player.getInventory();
                     ItemStack itemStack = new ItemStack(material, quantity);
+
                     if (playerInventory.containsAtLeast(itemStack, quantity)) {
                         DynamicChestShop.getEcon().depositPlayer(player, price);
                         ItemStack[] content = playerInventory.getContents();
+
                         for (ItemStack is : content) {
                             if (is != null && is.getType().equals(material)) {
                                 var amountOfItems = is.getAmount();
+
                                 if (amountOfItems >= quantity) {
                                     is.setAmount(amountOfItems - quantity);
                                     break;
@@ -139,23 +146,25 @@ public class AdminShopHandler implements Listener {
                         player.sendMessage("AdminShop: You do not have enough items to sell");
                     }
                 }
-
-                default -> throw new IllegalStateException("Unexpected value: " + action);
             }
         }
     }
 
     @EventHandler
     public void onSignBreak(BlockBreakEvent event) {
+        var player = event.getPlayer();
+
         if (event.getBlock().getState() instanceof Sign sign) {
-            if (sign.getLine(0).equals("[AdminShop]")
-                    && !event.getPlayer().hasPermission("dynamicshop.adminshop.toggle")) {
+            if (sign.getLine(NAME_LINE).equals("[AdminShop]")
+                    && !player.hasPermission("dynamicshop.adminshop.toggle")) {
                 event.setCancelled(true);
-                if (!event.getPlayer().hasPermission("dynamicshop.adminshop"))
-                    event.getPlayer().sendMessage("AdminShop: You can not destroy admin shops.");
-                else
-                    event.getPlayer().sendMessage("AdminShop: Use /toggleadmindestroy or\n" +
+
+                if (!player.hasPermission("dynamicshop.adminshop")) {
+                    player.sendMessage("AdminShop: You can not destroy admin shops.");
+                } else {
+                    player.sendMessage("AdminShop: Use /toggleadmindestroy or\n" +
                             " /tad to toggle admin shop destroy mode.");
+                }
             }
         }
     }

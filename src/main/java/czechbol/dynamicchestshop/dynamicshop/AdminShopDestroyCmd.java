@@ -1,4 +1,4 @@
-package czechbol.dynamicchestshop.staticshop;
+package czechbol.dynamicchestshop.dynamicshop;
 
 import czechbol.dynamicchestshop.DynamicChestShop;
 import org.bukkit.command.Command;
@@ -12,6 +12,7 @@ public class AdminShopDestroyCmd implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player) {
             Player player = (Player) sender; //TODO: This system doesn't work with /op-ed players
+
             if (player.hasPermission("dynamicshop.adminshop")) {
                 if (player.hasPermission("dynamicshop.adminshop.toggle")) {
                     DynamicChestShop.getPerms().playerRemove(player,
@@ -26,6 +27,7 @@ public class AdminShopDestroyCmd implements CommandExecutor {
                 player.sendMessage("AdminShop: You do not have permission to destroy admin shops");
             }
         }
+
         return false;
     }
 }
