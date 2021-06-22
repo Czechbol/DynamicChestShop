@@ -1,7 +1,7 @@
 #############################################################################
 #                                                                           #
 #                        DynamicChestShop config.yml                        #
-#                        Generated for version @version@                        #
+#                        Generated for version @version@                    #
 #                                                                           #
 #############################################################################
 
@@ -56,4 +56,17 @@ General:
   AllowPartialTransactions: true
 
 
+###########################################
+#           List of permissions           #
+###########################################
+# Allows modifying of other chest shops (excluding admin shops)
+#   - dynamicshop.modifyother
+# Allows creation of Admin Shop (unlimited money/items) and /tad command
+#   - dynamicshop.adminshop
+# Miscellaneous permission, do not use!
+#   - dynamicshop.adminshop.toggle
+# Allows creation of normal chestshop
+#   - dynamicshop.chestshop.create
+#
+#
 

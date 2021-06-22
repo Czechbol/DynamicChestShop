@@ -1,5 +1,8 @@
 package czechbol.dynamicchestshop.staticshop;
 
+import czechbol.dynamicchestshop.DynamicChestShop;
+import org.bukkit.Bukkit;
+
 import java.util.regex.Pattern;
 
 
@@ -25,9 +28,10 @@ public class ChestShop {
                 buy_price = price.replace("B", "");
                 price = m.group(3);
             }
-            if (price.contains("S")) {
-                sell_price = price.replace("S", "");
-            }
+            if(price != null)
+                if (price.contains("S")) {
+                    sell_price = price.replace("S", "");
+                }
         } else {
             throw new Exception("Bad format");
         }
@@ -37,6 +41,11 @@ public class ChestShop {
         if (buy_price != null) {
             stringBuilder.append("B ").append(buy_price);
             if (sell_price != null) {
+                if(buy_price.compareTo(sell_price) < 0
+                        && DynamicChestShop.getConf().getBoolean(
+                                "General.BlockHigherSellThanBuy")){
+                    throw new Exception("Sell price can not be higher that buy price.");
+                }
                 stringBuilder.append(":").append(sell_price).append(" S");
                 return stringBuilder.toString();
             }
@@ -56,11 +65,18 @@ public class ChestShop {
 
     public static float getSellPrice(String in) {
         var m = sell_price_pattern.matcher(in);
-        if (m.find()) {
-            if (m.groupCount() == 2)
-                return Float.parseFloat(m.group(2));
-            else if (m.groupCount() == 4)
-                return Float.parseFloat(m.group(4));
+        String str = null;
+        try {
+            if (m.find()) {
+                if (m.group(2) != null) {
+                    str = m.group(2);
+                } else if (m.group(4) != null) {
+                    str = m.group(4);
+                }
+                return Float.parseFloat(str);
+            }
+        } catch (NullPointerException exception) {
+            exception.printStackTrace();
         }
         return -1;
     }

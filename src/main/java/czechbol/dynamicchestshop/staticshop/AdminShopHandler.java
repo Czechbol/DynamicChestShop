@@ -42,7 +42,7 @@ public class AdminShopHandler implements Listener {
         try {
             e.setLine(PRICES_LINE, ChestShop.formatPrices(e.getLine(PRICES_LINE)));
         } catch (Exception exp) {
-            player.sendMessage("AdminShop: Shop could not be created");
+            player.sendMessage("AdminShop: " + exp.getMessage());
             block.setType(Material.AIR);
             return;
         }
@@ -81,8 +81,10 @@ public class AdminShopHandler implements Listener {
             switch (action) {
                 case LEFT_CLICK_BLOCK -> {
                     var price = ChestShop.getBuyPrice(sign.getLine(PRICES_LINE));
-                    System.out.println(price);
-                    if (price == -1) return;
+                    if (price == -1) {
+                        player.sendMessage("AdminShop: You can not buy in this shop.");
+                        return;
+                    }
 
                     if (DynamicChestShop.getEcon().getBalance(player) >= price) {
                         if (player.getInventory().firstEmpty() == -1) {
@@ -110,8 +112,10 @@ public class AdminShopHandler implements Listener {
 
                 case RIGHT_CLICK_BLOCK -> {
                     var price = ChestShop.getSellPrice(sign.getLine(PRICES_LINE));
-                    System.out.println(price);
-                    if (price == -1) return;
+                    if (price == -1) {
+                        player.sendMessage("AdminShop: You can not sell in this shop.");
+                        return;
+                    }
 
                     PlayerInventory playerInventory = player.getInventory();
                     ItemStack itemStack = new ItemStack(material, quantity);
