@@ -42,7 +42,7 @@ public class AdminShopHandler implements Listener {
         try {
             e.setLine(PRICES_LINE, ChestShop.formatPrices(e.getLine(PRICES_LINE)));
         } catch (Exception exp) {
-            player.sendMessage("AdminShop: Shop could not be created");
+            player.sendMessage("AdminShop: " + exp.getMessage());
             block.setType(Material.AIR);
             return;
         }

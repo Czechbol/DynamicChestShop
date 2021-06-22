@@ -1,5 +1,8 @@
 package czechbol.dynamicchestshop.staticshop;
 
+import czechbol.dynamicchestshop.DynamicChestShop;
+import org.bukkit.Bukkit;
+
 import java.util.regex.Pattern;
 
 
@@ -25,9 +28,10 @@ public class ChestShop {
                 buy_price = price.replace("B", "");
                 price = m.group(3);
             }
-            if (price.contains("S")) {
-                sell_price = price.replace("S", "");
-            }
+            if(price != null)
+                if (price.contains("S")) {
+                    sell_price = price.replace("S", "");
+                }
         } else {
             throw new Exception("Bad format");
         }
@@ -37,6 +41,11 @@ public class ChestShop {
         if (buy_price != null) {
             stringBuilder.append("B ").append(buy_price);
             if (sell_price != null) {
+                if(buy_price.compareTo(sell_price) < 0
+                        && DynamicChestShop.getConf().getBoolean(
+                                "General.BlockHigherSellThanBuy")){
+                    throw new Exception("Sell price can not be higher that buy price.");
+                }
                 stringBuilder.append(":").append(sell_price).append(" S");
                 return stringBuilder.toString();
             }

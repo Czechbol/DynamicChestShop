@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 import static czechbol.dynamicchestshop.staticshop.ChestShop.*;
 
@@ -49,7 +50,7 @@ public class ChestShopHandler implements Listener {
         try {
             e.setLine(PRICES_LINE, ChestShop.formatPrices(e.getLine(PRICES_LINE)));
         } catch (Exception exp) {
-            player.sendMessage("ChestShop: Could not be created");
+            player.sendMessage("ChestShop: " + exp.getMessage());
             e.setCancelled(true);
             return;
         }
@@ -108,7 +109,7 @@ public class ChestShopHandler implements Listener {
                             }
 
                             if (freeSpace < quantity) {
-                                player.sendMessage("AdminShop: Your inventory is full");
+                                player.sendMessage("ChestShop: Your inventory is full");
                                 return;
                             }
                         }
@@ -150,6 +151,19 @@ public class ChestShopHandler implements Listener {
                 }
 
                 default -> throw new IllegalStateException("Unexpected value: " + action);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onSignBreak(BlockBreakEvent event) {
+        if (event.getBlock().getState() instanceof Sign sign) {
+            if(Pattern.compile("\\[.+\\]").matcher(sign.getLine(NAME_LINE)).find()){
+                var playerName = sign.getLine(NAME_LINE).replaceAll("[\\[\\]]", "");
+                if (!event.getPlayer().getName().equals(playerName)) {
+                    if(!event.getPlayer().hasPermission("dynamicshop.modifyothers"))
+                        event.setCancelled(true);
+                }
             }
         }
     }
