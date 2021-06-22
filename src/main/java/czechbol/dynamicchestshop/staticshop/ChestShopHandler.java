@@ -22,7 +22,7 @@ public class ChestShopHandler implements Listener {
 
     /**
      * todo: Locale
-     * todo: check if chest is there and invulnerable it
+     * todo: make chest invulnerable
      */
     @EventHandler
     public void OnSignPlace(SignChangeEvent e) {
@@ -30,6 +30,7 @@ public class ChestShopHandler implements Listener {
         var player = e.getPlayer();
 
         if (!e.getLine(NAME_LINE).equalsIgnoreCase("[ChestShop]")) return;
+
         if (!block.getWorld().getBlockAt(block.getLocation()
                 .subtract(0, 1, 0)).getType().equals(Material.CHEST)) {
             player.sendMessage("ChestShop: In order to create chestshop, you have to place chest first");
@@ -63,14 +64,9 @@ public class ChestShopHandler implements Listener {
             player.sendMessage("ChestShop: Invalid item");
         }
 
-        //todo: set invulnerability
-
         player.sendMessage("ChestShop: Shop was created");
     }
 
-    /**
-     * todo: No buy price osetrenie
-     */
     @EventHandler
     public void OnSignInteract(PlayerInteractEvent e) {
         var action = e.getAction();
@@ -82,9 +78,9 @@ public class ChestShopHandler implements Listener {
 
         if (block.getState() instanceof Sign) {
             Sign sign = (Sign) block.getState();
-            //todo: check if chestshop
 
-            if (!sign.getLine(NAME_LINE).equals("[ChestShop]")) return;
+            if (!Pattern.compile("\\[.+\\]").matcher(sign.getLine(NAME_LINE)).find()
+                    || sign.getLine(NAME_LINE).equals("[AdminShop]")) return;
 
             var quantity = Integer.parseInt(sign.getLine(QUANTITY_LINE));
             var material = Material.getMaterial(sign.getLine(MATERIAL_LINE));
@@ -93,7 +89,10 @@ public class ChestShopHandler implements Listener {
             switch (action) {
                 case LEFT_CLICK_BLOCK -> {
                     var price = ChestShop.getBuyPrice(sign.getLine(PRICES_LINE));
-                    if (price == -1) return;
+                    if (price == -1) {
+                        player.sendMessage("ChestShop: You can not buy in this shop.");
+                        return;
+                    }
 
                     if (DynamicChestShop.getEcon().getBalance(player) >= price) {
                         if (player.getInventory().firstEmpty() == -1) {
@@ -123,7 +122,10 @@ public class ChestShopHandler implements Listener {
 
                 case RIGHT_CLICK_BLOCK -> {
                     var price = ChestShop.getSellPrice(sign.getLine(PRICES_LINE));
-                    if (price == -1) return;
+                    if (price == -1) {
+                        player.sendMessage("ChestShop: You can not sell in this shop.");
+                        return;
+                    }
 
                     PlayerInventory playerInventory = player.getInventory();
                     ItemStack itemStack = new ItemStack(material, quantity);
@@ -160,9 +162,9 @@ public class ChestShopHandler implements Listener {
         if (event.getBlock().getState() instanceof Sign sign) {
             if(Pattern.compile("\\[.+\\]").matcher(sign.getLine(NAME_LINE)).find()){
                 var playerName = sign.getLine(NAME_LINE).replaceAll("[\\[\\]]", "");
-                if (!event.getPlayer().getName().equals(playerName)) {
-                    if(!event.getPlayer().hasPermission("dynamicshop.modifyothers"))
-                        event.setCancelled(true);
+                if (!event.getPlayer().getName().equals(playerName)
+                        && !event.getPlayer().hasPermission("dynamicshop.modifyothers")) {
+                    event.setCancelled(true);
                 }
             }
         }
