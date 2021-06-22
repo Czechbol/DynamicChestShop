@@ -56,11 +56,18 @@ public class ChestShop {
 
     public static float getSellPrice(String in) {
         var m = sell_price_pattern.matcher(in);
-        if (m.find()) {
-            if (m.groupCount() == 2)
-                return Float.parseFloat(m.group(2));
-            else if (m.groupCount() == 4)
-                return Float.parseFloat(m.group(4));
+        String str = null;
+        try {
+            if (m.find()) {
+                if (m.group(2) != null) {
+                    str = m.group(2);
+                } else if (m.group(4) != null) {
+                    str = m.group(4);
+                }
+                return Float.parseFloat(str);
+            }
+        } catch (NullPointerException exception) {
+            exception.printStackTrace();
         }
         return -1;
     }

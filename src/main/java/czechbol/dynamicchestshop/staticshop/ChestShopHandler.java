@@ -1,15 +1,19 @@
 package czechbol.dynamicchestshop.staticshop;
 
 import czechbol.dynamicchestshop.DynamicChestShop;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+
+import java.util.Arrays;
 
 import static czechbol.dynamicchestshop.staticshop.ChestShop.*;
 
@@ -29,9 +33,6 @@ public class ChestShopHandler implements Listener {
                 .subtract(0, 1, 0)).getType().equals(Material.CHEST)) {
             player.sendMessage("ChestShop: In order to create chestshop, you have to place chest first");
             return;
-        }
-        if (block.getType() == Material.CHEST) {
-
         }
 
         e.setLine(NAME_LINE, String.format("[%s]", player.getName()));
