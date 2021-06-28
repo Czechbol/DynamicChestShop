@@ -1,5 +1,6 @@
 package czechbol.dynamicchestshop.customconfig;
 
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 
 public class MaterialPrices extends CustomConfigFile {
@@ -9,10 +10,10 @@ public class MaterialPrices extends CustomConfigFile {
     }
 
     public void initDefaults() {
-
-        getConfig().set("STONE", 10);
-        getConfig().set("DIRT", 20);
-        getConfig().set("GRASS_BLOCK", 30);
+        FileConfiguration config = getConfig(); //TODO: Initialize prices of other items
+        config.set("STONE.Price", 32);
+        config.set("DIAMOND.Price", 3200);
+        config.set("ENDER_PEARL.Price", 320);
 
         saveConfig();
     }

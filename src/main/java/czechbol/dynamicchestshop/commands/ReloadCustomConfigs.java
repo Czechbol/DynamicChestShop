@@ -18,13 +18,12 @@ public class ReloadCustomConfigs implements CommandExecutor {
 
         for (String confName : configs.keySet()) {
             if (configs.get(confName).reloadConfig()) {
-                DynamicChestShop.getPluginLogger().info(
-                        ChatColor.stripColor(prefix) + "Config file \"" + confName + "\" was reloaded.");
+                DynamicChestShop.getPluginLogger().info("[DynamicChestShop] Config file \"" + confName + "\" was reloaded.");
                 if (sender instanceof Player)
                     sender.sendMessage(prefix + "Config file \"" + ChatColor.GREEN
                             + confName + ChatColor.WHITE + "\" was reloaded.");
             } else {
-                DynamicChestShop.getPluginLogger().severe("Config file \"" + confName + "\" was not reloaded!");
+                DynamicChestShop.getPluginLogger().severe("[DynamicChestShop] Config file \"" + confName + "\" was not reloaded!");
                 if (sender instanceof Player)
                     sender.sendMessage(prefix + "Config file \"" + ChatColor.RED
                             + confName + ChatColor.WHITE + "\" was not reloaded!");

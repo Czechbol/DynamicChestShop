@@ -22,13 +22,17 @@ public abstract class CustomConfigFile {
 
     public boolean initConfig() {
         try {
-             confFile = new File(plugin.getDataFolder().getPath() + "/" + fileName);
+            var returnVal = false;
+            confFile = new File(plugin.getDataFolder().getPath() + "/" + fileName);
 
-            if (!confFile.exists()) confFile.createNewFile();
+            if (!confFile.exists()) {
+                confFile.createNewFile();
+                returnVal = true;
+            }
 
             config = new YamlConfiguration();
             config.load(confFile);
-            return true;
+            return returnVal;
         } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
             return false;
@@ -47,7 +51,7 @@ public abstract class CustomConfigFile {
         }
     }
 
-    public void saveConfig(){
+    public void saveConfig() {
         try {
             config.save(confFile);
         } catch (IOException e) {

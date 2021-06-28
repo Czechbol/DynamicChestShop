@@ -47,9 +47,9 @@ public final class DynamicChestShop extends JavaPlugin {
         CustomConfigFile materialPrices = new MaterialPrices("material_prices.yml", this);
         customConfigs.put(materialPrices.getFileName(), materialPrices);
 
-        for (String confName : customConfigs.keySet()){
-            customConfigs.get(confName).initConfig();
-            customConfigs.get(confName).initDefaults();
+        for (String confName : customConfigs.keySet()) {
+            if (customConfigs.get(confName).initConfig())
+                customConfigs.get(confName).initDefaults();
         }
 
         prefix = ChatColor.translateAlternateColorCodes('&', config.getString("General.Prefix"));
@@ -101,8 +101,8 @@ public final class DynamicChestShop extends JavaPlugin {
         var prefix = config.getString("General.Prefix");
         if (prefix == null) param = "Prefix";
 
-        var steepness = config.getInt("General.Steepness");
-        if(steepness < 2000) param = "Steepness";
+        var capacityT = config.getDouble("General.CapacityThreshold");
+        if (capacityT <= 0) param = "CapacityThreshold";
 
         var difference = config.getDouble("General.Difference");
         if (difference <= 0 || difference > 1) param = "Difference";
@@ -130,7 +130,7 @@ public final class DynamicChestShop extends JavaPlugin {
         return prefix;
     }
 
-    public static HashMap<String, CustomConfigFile> getCustomConfigs(){
+    public static HashMap<String, CustomConfigFile> getCustomConfigs() {
         return customConfigs;
     }
 

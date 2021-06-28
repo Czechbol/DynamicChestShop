@@ -66,12 +66,17 @@ General:
   # Price would be adequately scaled
   AllowPartialTransactions: true
 
-  # Steepness of hyperbolic curve used in dynamic pricing, HIGHER NUMBERS = price will change slower (min value is 2000)
-  Steepness: 2000
+  # When should item price hit specified price in "material_prices.yml" file? Example: 0.5 = at half capacity
+  CapacityThreshold: 0.5
 
-  # Difference between buy and sell prices in % (Diff. is calculated from buy price)
-  # For example 0.95 means that sell price will be 95% of buy price...
+  # Should be admin shop filled to specified capacity threshold in the option above when created?
+  FillAdminShop: true
+
+  # Specifies how much will sell price be in % (Diff. is calculated from buy price)
+  # Example 0.95 means that sell price will be 95% of buy price...
   Difference: 0.95
+
+
 
 
 ###########################################
