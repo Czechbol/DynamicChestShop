@@ -12,3 +12,9 @@ commands:
     permission: dynamicshop.adminshop
     aliases:
       - tad
+  addtobalance:
+    description: Adds amount of money to balance
+  clearbalance:
+    description: Clears balance
+  reloadconfigs:
+    description: Reloads custom configuration files
