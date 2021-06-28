@@ -40,14 +40,25 @@ Storage:
 General:
   # The plugin language
   Language: en
-  # Tax percentage that goes to the server account (0-100)
-  Taxes: 25
+
+  # Plugin chat prefix
+  Prefix: "&cAdminShop&f: "
+
+#  # Choose in which mode should plugin function:
+#  #  0 = Only infinite shops. The initial chest will be removed and prices will be static
+#  #  1 = Only normal shops. The initial chest will act as shop storage and prices will be dynamic
+#  #  2 = Both. The initial chest won't be removed. If you want to create infinite shop you will need to destroy the chest manually.
+#  Mode: 0
+
   # How many most used shops should be cached internally
   CachedShops: 100
+
   # Whether holding SHIFT while interacting works in stacks
   ShiftStacks: false
+
   # Newbie helper: Blocks creation of chest shops that people can sell to for lower price then buy from
   BlockHigherSellThanBuy: true
+
   # Will allow transaction of lower amount if:
   # - chestshop gets full
   # - buyer doesn't have enough money
@@ -55,18 +66,26 @@ General:
   # Price would be adequately scaled
   AllowPartialTransactions: true
 
+  # When should item price hit specified price in "material_prices.yml" file? Example: 0.5 = at half capacity
+  CapacityThreshold: 0.5
+
+  # Should be admin shop filled to specified capacity threshold in the option above when created?
+  FillAdminShop: true
+
+  # Specifies how much will sell price be in % (Diff. is calculated from buy price)
+  # Example 0.95 means that sell price will be 95% of buy price...
+  Difference: 0.95
+
+
+
 
 ###########################################
 #           List of permissions           #
 ###########################################
-# Allows modifying of other chest shops (excluding admin shops)
-#   - dynamicshop.modifyother
-# Allows creation of Admin Shop (unlimited money/items) and /tad command
+# Allows creation of Admin Shop and /tad command
 #   - dynamicshop.adminshop
 # Miscellaneous permission, do not use!
 #   - dynamicshop.adminshop.toggle
-# Allows creation of normal chestshop
-#   - dynamicshop.chestshop.create
 #
 #
 
