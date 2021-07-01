@@ -73,11 +73,25 @@ General:
   FillAdminShop: true
 
   # Specifies how much will sell price be in % (Diff. is calculated from buy price)
+  # If option "BlockHigherSellThanBuy" is enabled the difference can not be > 1
   # Example 0.95 means that sell price will be 95% of buy price...
   Difference: 0.95
 
+#########################################
+#              File Settings            #
+#########################################
 
+FileSettings:
+  # Name of prices.yml file
+  PricesFile: "prices.yml"
 
+  # Should be prices for all craftable items from items specified in "InputFile" option calculated?
+  # If TRUE, all items from input file plus everything that can be crafted from them will be available for trading
+  # If FALSE, only items that are in file "prices.yml" will be able to be traded
+  CalculatePrices: false
+
+  # Input file that contains prices of some basic items.
+  InputFile: "inItems.txt"
 
 ###########################################
 #           List of permissions           #

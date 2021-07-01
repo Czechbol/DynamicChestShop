@@ -18,3 +18,5 @@ commands:
     description: Clears balance
   reloadconfigs:
     description: Reloads custom configuration files
+  genprices:
+    description: Calculates prices from file
