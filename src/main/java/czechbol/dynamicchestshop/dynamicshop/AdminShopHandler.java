@@ -1,6 +1,7 @@
 package czechbol.dynamicchestshop.dynamicshop;
 
 import czechbol.dynamicchestshop.DynamicChestShop;
+import czechbol.dynamicchestshop.customconfig.CustomConfigFile;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -29,7 +30,8 @@ public class AdminShopHandler implements Listener {
     private final boolean fillAdminShopFlag = config.getBoolean("General.FillAdminShop");
     private final String prefix = DynamicChestShop.getPluginPrefix();
     private double materialSteepness;
-    private FileConfiguration materials = DynamicChestShop.getCustomConfigs().get("material_prices.yml").getConfig();
+    private CustomConfigFile materials = DynamicChestShop.getCustomConfigs()
+            .get(config.getString("FileSettings.PricesFile"));
 
     @EventHandler
     public void onSignEdit(SignChangeEvent e) {
@@ -76,10 +78,18 @@ public class AdminShopHandler implements Listener {
             return;
         }
 
-        materialSteepness = materials.getInt(materialIS.getType() + ".Price")
+        materialSteepness = materials.getConfig().getInt(materialIS.getType() + ".Price")
                 * chest.getBlockInventory().getSize() * materialIS.getMaxStackSize() * capacityThresholdValue;
-        System.out.println(materialSteepness);
-        materials.set(materialIS.getType() + ".Steepness", materialSteepness);
+
+        if (materialSteepness == 0) {
+            player.sendMessage(prefix + "This item doesn't have a price."); //TODO: Command to add prices ingame
+            e.setCancelled(true);
+            return;
+        }
+
+        materials.getConfig().set(materialIS.getType() + ".Steepness", materialSteepness); //TODO: Insert this to DB
+
+        materials.saveConfig();
 
         if (fillAdminShopFlag) {
             chest.getBlockInventory().clear();
@@ -88,20 +98,18 @@ public class AdminShopHandler implements Listener {
                     * materialIS.getMaxStackSize() * capacityThresholdValue)
                 chest.getBlockInventory().addItem(materialIS);
 
-            buyPrice = (int) (materialSteepness / chest.getBlockInventory().getSize()
-                    * materialIS.getMaxStackSize() * capacityThresholdValue);
-            sellPrice = (int) (materialSteepness / chest.getBlockInventory().getSize()
-                    * materialIS.getMaxStackSize() * capacityThresholdValue * differenceValue);
+            buyPrice = (int) (materialSteepness / (chest.getBlockInventory().getSize()
+                    * materialIS.getMaxStackSize() * capacityThresholdValue));
+            sellPrice = (int) (materialSteepness / (chest.getBlockInventory().getSize()
+                    * materialIS.getMaxStackSize() * capacityThresholdValue) * differenceValue);
         } else {
             buyPrice = (int) (materialSteepness / quantity);
             sellPrice = (int) (materialSteepness / quantity * differenceValue);
         }
 
-        System.out.println(buyPrice + " " + sellPrice);
-
         e.setLine(NAME_LINE, "[AdminShop]");
         e.setLine(QUANTITY_LINE, String.valueOf(quantity));
-        e.setLine(PRICES_LINE, String.format("B %d:%d S", buyPrice, sellPrice)); //TODO: Get unique starting prices of item from file or DB
+        e.setLine(PRICES_LINE, String.format("B %d:%d S", buyPrice, sellPrice));
         e.setLine(MATERIAL_LINE, materialIS.getType().toString());
 
         player.sendMessage(prefix + "Shop was created.");
@@ -124,7 +132,7 @@ public class AdminShopHandler implements Listener {
             var material = Material.getMaterial(sign.getLine(MATERIAL_LINE));
 
             if (material == null) {
-                player.sendMessage(prefix + "Invalid item");
+                player.sendMessage(prefix + "Invalid item.");
                 return;
             }
 
@@ -134,16 +142,16 @@ public class AdminShopHandler implements Listener {
                 chest.setCustomName("Test");
             }
 
-            materialSteepness = materials.getInt(material + ".Steepness");
+            materialSteepness = materials.getConfig().getInt(material + ".Steepness");
 
             if (materialSteepness == 0) return;
+
+            int buyPrice = AdminShop.getBuyPrice(sign.getLine(PRICES_LINE));
+            int sellPrice = AdminShop.getSellPrice(sign.getLine(PRICES_LINE));
 
             if (e.getPlayer().isSneaking()) {
                 quantity = material.getMaxStackSize();
             }
-
-            int buyPrice = AdminShop.getBuyPrice(sign.getLine(PRICES_LINE));
-            int sellPrice = AdminShop.getSellPrice(sign.getLine(PRICES_LINE));
 
             switch (action) {
                 case LEFT_CLICK_BLOCK -> {
@@ -210,7 +218,7 @@ public class AdminShopHandler implements Listener {
                             sign.update();
                             //TODO: Change global price on buy in DB
                         } else {
-                            player.sendMessage(prefix + "Shop is empty.");
+                            player.sendMessage(prefix + "Shop is nearly empty, you can not shift trade");
                             e.setCancelled(true);
                         }
                     } else {
