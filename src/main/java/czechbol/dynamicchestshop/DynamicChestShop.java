@@ -64,7 +64,7 @@ public final class DynamicChestShop extends JavaPlugin {
         Bukkit.getServer().getPluginCommand("genprices").setExecutor(new GenerateItemPrices());
 
         //Vault hooks, disable plugin if vault hooking failed
-        if (!setupEconomy() || !setupPermissions()) Bukkit.getServer().getPluginManager().disablePlugin(this);
+        if (!setupEconomy() || !setupPermissions() || !setupDatabase()) Bukkit.getServer().getPluginManager().disablePlugin(this);
     }
 
     @Override
@@ -72,7 +72,7 @@ public final class DynamicChestShop extends JavaPlugin {
         // Plugin shutdown logic
     }
 
-    private void setupDatabase() {
+    private boolean setupDatabase() {
         var storage_method = config.getString("Storage.StorageMethod");
         assert storage_method != null;
         var address = config.getString("Storage.DatabaseSettings.Address");
@@ -105,10 +105,11 @@ public final class DynamicChestShop extends JavaPlugin {
             getLogger().log(Level.SEVERE, String.format("[DynamicChestShop] cannot use %s as database", storage_method));
         }
 
-        var db = String.format("jdbc:%s://%s:%s/%s@%s", connector, address, username, password, database);
+        var db = String.format("jdbc:%s://%s/%s", connector, address, database);
+        getLogger().log(Level.INFO, db);
 
         try {
-            conn = DriverManager.getConnection(db);
+            conn = DriverManager.getConnection(db, username, password);
         } catch (SQLException ex) {
             getLogger().log(Level.SEVERE, "[DynamicChestShop] cannot connect to database");
         }
@@ -116,8 +117,11 @@ public final class DynamicChestShop extends JavaPlugin {
         try {
             Price.createTable();
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            getLogger().log(Level.SEVERE, "[DynamicChestShop]" + throwables.getMessage());
+            return false;
         }
+
+        return true;
     }
 
     private boolean setupEconomy() {
