@@ -19,6 +19,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import java.sql.SQLException;
+
 import static czechbol.dynamicchestshop.dynamicshop.AdminShop.*;
 
 public class AdminShopHandler implements Listener {
@@ -87,8 +89,7 @@ public class AdminShopHandler implements Listener {
             return;
         }
 
-        materials.getConfig().set(materialIS.getType() + ".Steepness", materialSteepness); //TODO: Insert this to DB
-
+        materials.getConfig().set(materialIS.getType() + ".Steepness", materialSteepness);
         materials.saveConfig();
 
         if (fillAdminShopFlag) {
@@ -112,11 +113,19 @@ public class AdminShopHandler implements Listener {
         e.setLine(PRICES_LINE, String.format("B %d:%d S", buyPrice, sellPrice));
         e.setLine(MATERIAL_LINE, materialIS.getType().toString());
 
+        try {
+            Price.add(materialIS.getType(), buyPrice, sellPrice);
+        } catch (SQLException exp) {
+            e.setCancelled(true);
+            player.sendMessage(prefix + "Shop already exists.");
+            return;
+        }
+
         player.sendMessage(prefix + "Shop was created.");
     }
 
     @EventHandler
-    public void OnSignInteract(PlayerInteractEvent e) {
+    public void OnSignInteract(PlayerInteractEvent e) throws SQLException {
         var action = e.getAction();
         var player = e.getPlayer();
 
@@ -216,7 +225,11 @@ public class AdminShopHandler implements Listener {
                                 sign.setLine(PRICES_LINE, String.format("B %d:%d S", newBuyPrice, buyPrice));
 
                             sign.update();
-                            //TODO: Change global price on buy in DB
+
+                            var price = new Price(material);
+                            price.setBuyPrice(newBuyPrice);
+                            price.setSellPrice(buyPrice);
+                            price.update();
                         } else {
                             player.sendMessage(prefix + "Shop is nearly empty, you can not shift trade");
                             e.setCancelled(true);
@@ -280,7 +293,11 @@ public class AdminShopHandler implements Listener {
                             sign.setLine(PRICES_LINE, String.format("B %d:%d S", sellPrice, newSellPrice));
 
                         sign.update();
-                        //TODO: Change global price on sell in DB
+
+                        var price = new Price(material);
+                        price.setSellPrice(newSellPrice);
+                        price.setBuyPrice(sellPrice);
+                        price.update();
                     } else {
                         player.sendMessage(prefix + "You do not have enough items to sell");
                     }
@@ -291,10 +308,11 @@ public class AdminShopHandler implements Listener {
     }
 
     @EventHandler
-    public void onBlockBreak(BlockBreakEvent event) {
+    public void onBlockBreak(BlockBreakEvent event) throws SQLException {
         //TODO: Check if broken block has a shop sign attached to it
         Player player = event.getPlayer();
         BlockState blockState = event.getBlock().getState();
+        Material material = null;
 
         if (blockState instanceof Sign sign
                 && sign.getBlock().getRelative(BlockFace.DOWN, 1).getState() instanceof Chest chest
@@ -302,6 +320,7 @@ public class AdminShopHandler implements Listener {
 
             chest.getBlockInventory().clear();
             chest.getBlock().setType(Material.AIR);
+            material = Material.getMaterial(sign.getLine(MATERIAL_LINE));
 
         } else if (blockState instanceof Chest chest
                 && chest.getBlock().getRelative(BlockFace.UP, 1).getState() instanceof Sign sign
@@ -309,8 +328,15 @@ public class AdminShopHandler implements Listener {
 
             event.setCancelled(true);
             chest.getBlockInventory().clear();
+            material = Material.getMaterial(sign.getLine(MATERIAL_LINE));
             sign.getBlock().setType(Material.AIR);
             chest.getBlock().setType(Material.AIR);
+        }
+
+        if (material != null) {
+            var price = new Price(material);
+            price.setActive(false);
+            price.update();
         }
     }
 

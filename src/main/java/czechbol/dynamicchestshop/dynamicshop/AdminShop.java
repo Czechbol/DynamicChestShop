@@ -47,12 +47,11 @@ public class AdminShop {
         return NOT_FOR_SALE;
     }
 
-    //TODO: testing
-    public static float getPrice(String in) {
+    public static int getPrice(String in) {
         var m = price_pattern.matcher(in);
 
         if (m.find()) {
-            return Float.parseFloat(m.group(1));
+            return Integer.parseInt(m.group(1));
         }
 
         return 0;
