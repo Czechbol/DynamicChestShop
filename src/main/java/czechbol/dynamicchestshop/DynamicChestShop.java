@@ -5,6 +5,7 @@ import czechbol.dynamicchestshop.customconfig.CustomConfigFile;
 import czechbol.dynamicchestshop.customconfig.MaterialPrices;
 import czechbol.dynamicchestshop.dynamicshop.AdminShop;
 import czechbol.dynamicchestshop.dynamicshop.AdminShopHandler;
+import czechbol.dynamicchestshop.dynamicshop.Price;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
@@ -15,6 +16,9 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +31,7 @@ public final class DynamicChestShop extends JavaPlugin {
     private static String prefix = null;
     private static HashMap<String, CustomConfigFile> customConfigs = new HashMap<>();
     private static final Logger pluginLogger = Bukkit.getLogger();
+    private static Connection conn = null;
 
     @Override
     public void onEnable() {
@@ -65,6 +70,54 @@ public final class DynamicChestShop extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+    }
+
+    private void setupDatabase() {
+        var storage_method = config.getString("Storage.StorageMethod");
+        assert storage_method != null;
+        var address = config.getString("Storage.DatabaseSettings.Address");
+        var database = config.getString("Storage.DatabaseSettings.Database");
+        var username = config.getString("Storage.DatabaseSettings.Username");
+        var password = config.getString("Storage.DatabaseSettings.Password");
+
+        String connector = null;
+
+        try {
+            connector = switch (storage_method) {
+                case "PostgreSQL" -> {
+                    DriverManager.registerDriver(new org.postgresql.Driver());
+                    yield "postgresql";
+                }
+                case "MariaDB" -> {
+                    DriverManager.registerDriver(new org.mariadb.jdbc.Driver());
+                    yield "mariadb";
+                }
+                case "MySQL" -> {
+                    DriverManager.registerDriver(new com.mysql.jdbc.Driver());
+                    yield "mysql";
+                }
+                case "SQLite" -> {
+                    yield "sqlite";
+                }
+                default -> throw new IllegalStateException();
+            };
+        } catch (SQLException | IllegalStateException ex) {
+            getLogger().log(Level.SEVERE, String.format("[DynamicChestShop] cannot use %s as database", storage_method));
+        }
+
+        var db = String.format("jdbc:%s://%s:%s/%s@%s", connector, address, username, password, database);
+
+        try {
+            conn = DriverManager.getConnection(db);
+        } catch (SQLException ex) {
+            getLogger().log(Level.SEVERE, "[DynamicChestShop] cannot connect to database");
+        }
+
+        try {
+            Price.createTable();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
     private boolean setupEconomy() {
@@ -125,6 +178,10 @@ public final class DynamicChestShop extends JavaPlugin {
 
     public static FileConfiguration getConf() {
         return config;
+    }
+
+    public static Connection getConn() {
+        return conn;
     }
 
     public static String getPluginPrefix() {
