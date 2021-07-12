@@ -22,6 +22,7 @@ public class Price {
         stmt.setMaxRows(1);
         stmt.setString(1, material.toString());
         var set = stmt.executeQuery();
+        set.next();
 
         this.id = set.getInt("id");
         this.material = Material.getMaterial(set.getString("material"));
@@ -41,27 +42,28 @@ public class Price {
         stmt.setBoolean(4, this.active);
         stmt.setInt(5, this.id);
 
-        stmt.executeQuery();
+        stmt.executeUpdate();
     }
 
-    public static void add(Material material, int buy_price, int sell_price) throws SQLException {
+    public static void add(Material material, int buy_price, int sell_price, double steepness) throws SQLException {
         Price price = null;
         try {
             price = new Price(material);
         } catch (SQLException e) {
             var stmt = conn.prepareStatement("""
                 INSERT INTO material_prices (
-                    material, buy_price, sell_price, active
+                    material, buy_price, sell_price, steepness, active
                 ) VALUES (
-                    ?, ?, ?, ?
+                    ?, ?, ?, ?, ?
                 )
                 """);
             stmt.setString(1, material.toString());
             stmt.setInt(2, buy_price);
             stmt.setInt(3, sell_price);
-            stmt.setBoolean(4, true);
+            stmt.setDouble(4, steepness);
+            stmt.setBoolean(5, true);
 
-            stmt.executeQuery();
+            stmt.executeUpdate();
             return;
         }
 
@@ -71,14 +73,15 @@ public class Price {
 
     public static void createTable() throws SQLException {
         var stmt = conn.createStatement();
-        stmt.executeQuery("""
+        stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS material_prices (
                     id SERIAL PRIMARY KEY,
-                    material varchar UNIQUE,
+                    material varchar(36),
                     buy_price int NOT NULL,
                     sell_price int NOT NULL,
                     steepness float NOT NULL,
-                    active bool NOT NULL DEFAULT(false)
+                    active bool NOT NULL DEFAULT(false),
+                    CONSTRAINT material_unique UNIQUE (material)
                 );
                 """);
     }

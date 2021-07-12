@@ -114,9 +114,10 @@ public class AdminShopHandler implements Listener {
         e.setLine(MATERIAL_LINE, materialIS.getType().toString());
 
         try {
-            Price.add(materialIS.getType(), buyPrice, sellPrice);
+            Price.add(materialIS.getType(), buyPrice, sellPrice, materialSteepness);
         } catch (SQLException exp) {
             e.setCancelled(true);
+            player.sendMessage(exp.getMessage());
             player.sendMessage(prefix + "Shop already exists.");
             return;
         }
